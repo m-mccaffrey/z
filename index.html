@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluent IF — a conversational wrapper for text adventures</title>
+  <meta name="description" content="Play Zork and other Z-machine interactive fiction with a natural-language front end. An LLM translates loose, conversational input into the terse commands the game expects — the game's own text is never altered." />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1>Fluent IF</h1>
+      <p class="tagline">Talk to the parser however you like. It still only ever sees exact adventure-game commands.</p>
+      <div class="topbar-actions">
+        <button id="story-btn" class="btn" type="button">Story…</button>
+        <button id="settings-btn" class="btn" type="button">Interpreter settings…</button>
+      </div>
+    </header>
+
+    <main class="terminal" id="terminal" aria-live="polite">
+      <div class="game-status" id="game-status" aria-hidden="true"></div>
+      <div class="output" id="output"></div>
+    </main>
+
+    <form class="input-row" id="input-form">
+      <span class="prompt">&gt;</span>
+      <input
+        id="command-input"
+        type="text"
+        autocomplete="off"
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        placeholder="say whatever's natural — e.g. “grab the lamp and head north”"
+        disabled
+      />
+      <button type="submit" class="btn btn-primary" id="send-btn" disabled>Send</button>
+    </form>
+
+    <footer class="statusbar">
+      <span id="status-text">Loading interpreter…</span>
+      <label class="raw-toggle" title="Send your typed text straight to the game, no LLM in between">
+        <input type="checkbox" id="raw-toggle" />
+        raw mode
+      </label>
+    </footer>
+  </div>
+
+  <dialog id="story-dialog" class="dialog">
+    <form method="dialog" class="dialog-form">
+      <h2>Choose a story</h2>
+      <p>
+        This page ships with a small original demo game (no copyrighted
+        content required to make it run). To play an actual Infocom game
+        such as <em>Zork I</em>, upload a Z-machine story file you already
+        own a legal copy of — the file stays on your device; nothing is
+        uploaded anywhere.
+      </p>
+      <div class="dialog-actions">
+        <button type="button" class="btn" id="load-demo-btn">Play the bundled demo</button>
+        <label class="btn file-btn">
+          Upload a story file (.z3/.z5/.z8/.zblorb)
+          <input type="file" id="story-file-input" accept=".z3,.z5,.z8,.zblorb,.blorb" hidden />
+        </label>
+      </div>
+      <p class="hint">
+        Get your own Zork story files from a copy you legally own (for
+        example, extracted from an official release you purchased). This
+        tool is a command interpreter, not a source of game content.
+      </p>
+      <div class="dialog-close">
+        <button type="submit" class="btn">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settings-dialog" class="dialog">
+    <form method="dialog" class="dialog-form" id="settings-form">
+      <h2>Interpreter settings</h2>
+      <p class="hint">
+        Translating your input into game commands calls an LLM API
+        directly from your browser using your own API key. The key is
+        stored only in this browser's local storage and is sent only to
+        the provider you choose below.
+      </p>
+      <label class="field">
+        Provider
+        <select id="provider-select">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI</option>
+        </select>
+      </label>
+      <label class="field">
+        Model
+        <input type="text" id="model-input" placeholder="e.g. claude-sonnet-5 or gpt-4o-mini" />
+      </label>
+      <label class="field">
+        API key
+        <input type="password" id="apikey-input" autocomplete="off" placeholder="sk-… / your provider key" />
+      </label>
+      <div class="dialog-actions">
+        <button type="submit" class="btn btn-primary" id="save-settings-btn">Save</button>
+        <button type="button" class="btn" id="clear-settings-btn">Clear key</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

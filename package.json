@@ -1,0 +1,18 @@
+{
+  "name": "fluent-if",
+  "version": "1.0.0",
+  "description": "An LLM-powered command interpreter wrapper for Z-machine interactive fiction (Zork and friends), playable entirely in the browser.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "ifvms": "^1.1.6"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
