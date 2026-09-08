@@ -7,7 +7,7 @@ You type however feels natural. An LLM translates that into the exact terse comm
 ## How it's built
 
 - **Interpreter**: [ifvms.js](https://github.com/curiousdannii/ifvms.js), a Z-machine (Zork/Infocom-format) emulator in JavaScript, running fully client-side. `src/glk.js` is a small [Glk](<https://en.wikipedia.org/wiki/Glk_(software)>) I/O shim written for this project so ifvms has something to talk to; `src/interpreter.js` wraps it in a plain line-in/text-out API.
-- **Command interpreter**: `src/llm.js` calls the Anthropic or OpenAI API directly from your browser, using an API key you supply yourself (see below). It asks the model to rewrite your input into a short parser command and nothing else.
+- **Command interpreter**: `src/llm.js` calls the Anthropic, OpenAI, or Gemini API directly from your browser, using an API key you supply yourself (see below). It asks the model to rewrite your input into a short parser command and nothing else.
 - **No build-time game content**: the repo ships with a small original 3-room demo game (`public/stories/cloakroom.z5`, compiled from `tools/cloak-of-darkness/cloak.inf`) so the site works the moment it's deployed. Actual Infocom games like *Zork I* are still under copyright — load one by uploading a story file from a copy you legally own via the **Story…** menu. Nothing you upload leaves your browser.
 
 ## Local development
@@ -28,7 +28,7 @@ One manual step is required once per repo: in **Settings → Pages**, set **Sour
 ## Using it
 
 1. Open the deployed page (or `npm run dev`). It boots straight into the bundled demo game.
-2. Click **Interpreter settings…**, pick a provider (Anthropic or OpenAI), and paste in your own API key. It's stored only in your browser's `localStorage` and is only ever sent to the provider you chose.
+2. Click **Interpreter settings…**, pick a provider (Anthropic, OpenAI, or Gemini), and paste in your own API key. It's stored only in your browser's `localStorage` and is only ever sent to the provider you chose. (Anthropic and OpenAI reliably support calling their API directly from a browser; Gemini's CORS support is less consistently documented, so if it errors out, fall back to raw mode.)
 3. Type naturally — "grab the lamp and head north", "what am I carrying?", "hang the cloak up before we go to the bar" — and the interpreter figures out the parser command.
 4. Toggle **raw mode** at any time to bypass the LLM and type exact commands straight to the game (also the automatic fallback when no key is configured).
 5. Use **Story…** to switch to your own `.z3`/`.z5`/`.z8`/`.zblorb` file.

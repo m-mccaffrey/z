@@ -6,6 +6,7 @@
 export const DEFAULT_MODELS = {
     anthropic: 'claude-sonnet-5',
     openai: 'gpt-4o-mini',
+    gemini: 'gemini-2.5-flash',
 };
 
 const SYSTEM_PROMPT = `You are the input layer for a classic text-adventure (interactive fiction) parser, in the style of Zork. The parser only understands short, literal commands: a verb, sometimes followed by one or two nouns — for example "look", "north", "take lamp", "open mailbox", "put cloak on hook", "inventory", "unlock door with key".
@@ -67,6 +68,27 @@ async function callAnthropic({ apiKey, model, userMessage }) {
     return cleanCommand(text);
 }
 
+async function callGemini({ apiKey, model, userMessage }) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model || DEFAULT_MODELS.gemini)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+            systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            generationConfig: { maxOutputTokens: 60 },
+        }),
+    });
+    if (!res.ok) {
+        throw new Error(`Gemini API error ${res.status}: ${await safeText(res)}`);
+    }
+    const data = await res.json();
+    const text = (data.candidates?.[0]?.content?.parts || []).map((part) => part.text || '').join('');
+    return cleanCommand(text);
+}
+
 async function callOpenAI({ apiKey, model, userMessage }) {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -98,6 +120,9 @@ export async function interpretCommand({ provider, apiKey, model, transcriptTail
     const userMessage = buildUserMessage(transcriptTail, input);
     if (provider === 'openai') {
         return callOpenAI({ apiKey, model, userMessage });
+    }
+    if (provider === 'gemini') {
+        return callGemini({ apiKey, model, userMessage });
     }
     return callAnthropic({ apiKey, model, userMessage });
 }

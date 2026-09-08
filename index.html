@@ -84,11 +84,18 @@
         stored only in this browser's local storage and is sent only to
         the provider you choose below.
       </p>
+      <p class="hint">
+        Anthropic and OpenAI reliably accept these direct browser calls.
+        Gemini's API does too in most setups, but Google's CORS support
+        for it is less consistently documented — if it errors out for
+        you, raw mode is always available as a fallback.
+      </p>
       <label class="field">
         Provider
         <select id="provider-select">
           <option value="anthropic">Anthropic (Claude)</option>
           <option value="openai">OpenAI</option>
+          <option value="gemini">Google (Gemini)</option>
         </select>
       </label>
       <label class="field">
