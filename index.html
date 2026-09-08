@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fluent IF — a conversational wrapper for text adventures</title>
   <meta name="description" content="Play Zork and other Z-machine interactive fiction with a natural-language front end. An LLM translates loose, conversational input into the terse commands the game expects — the game's own text is never altered." />
-  <script type="module" crossorigin src="./assets/index-C0hU0sAU.js"></script>
+  <script type="module" crossorigin src="./assets/index-Bv6oVAuz.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-9Uo0bHwv.css">
 </head>
 <body>
@@ -85,11 +85,18 @@
         stored only in this browser's local storage and is sent only to
         the provider you choose below.
       </p>
+      <p class="hint">
+        Anthropic and OpenAI reliably accept these direct browser calls.
+        Gemini's API does too in most setups, but Google's CORS support
+        for it is less consistently documented — if it errors out for
+        you, raw mode is always available as a fallback.
+      </p>
       <label class="field">
         Provider
         <select id="provider-select">
           <option value="anthropic">Anthropic (Claude)</option>
           <option value="openai">OpenAI</option>
+          <option value="gemini">Google (Gemini)</option>
         </select>
       </label>
       <label class="field">
