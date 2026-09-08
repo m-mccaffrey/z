@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fluent IF — a conversational wrapper for text adventures</title>
   <meta name="description" content="Play Zork and other Z-machine interactive fiction with a natural-language front end. An LLM translates loose, conversational input into the terse commands the game expects — the game's own text is never altered." />
-  <script type="module" crossorigin src="./assets/index-Bv6oVAuz.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-9Uo0bHwv.css">
+  <script type="module" crossorigin src="./assets/index-CdkpFMy9.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DZvNtuoy.css">
 </head>
 <body>
   <div class="app">
@@ -41,10 +41,16 @@
 
     <footer class="statusbar">
       <span id="status-text">Loading interpreter…</span>
-      <label class="raw-toggle" title="Send your typed text straight to the game, no LLM in between">
-        <input type="checkbox" id="raw-toggle" />
-        raw mode
-      </label>
+      <div class="toggles">
+        <label class="raw-toggle" title="Send your typed text straight to the game, no LLM in between">
+          <input type="checkbox" id="raw-toggle" />
+          raw mode
+        </label>
+        <label class="raw-toggle" title="Show exactly what the model returned, alongside the cleaned-up command sent to the game">
+          <input type="checkbox" id="debug-toggle" />
+          show LLM details
+        </label>
+      </div>
     </footer>
   </div>
 
