@@ -27,13 +27,16 @@ function buildUserMessage(transcriptTail, input) {
 
 function cleanCommand(text) {
     let cmd = (text || '').trim();
-    cmd = cmd.replace(/^```[a-z]*\n?/i, '').replace(/```$/, '');
-    cmd = cmd.trim().replace(/^["'`]+|["'`]+$/g, '');
-    const firstLine = cmd
-        .split('\n')
-        .map((s) => s.trim())
-        .filter(Boolean)[0];
-    return (firstLine || '').slice(0, 200);
+    cmd = cmd.replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/, '');
+    const firstLine =
+        cmd
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean)[0] || '';
+    // Strip surrounding quotes from just that line, not the whole blob —
+    // otherwise a quote that only wraps line 1 survives when the model
+    // tacks on a second line of chatter after it.
+    return firstLine.replace(/^["'`]+|["'`]+$/g, '').slice(0, 200);
 }
 
 async function safeText(res) {
@@ -45,6 +48,7 @@ async function safeText(res) {
 }
 
 async function callAnthropic({ apiKey, model, userMessage }) {
+    const usedModel = model || DEFAULT_MODELS.anthropic;
     const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -54,7 +58,7 @@ async function callAnthropic({ apiKey, model, userMessage }) {
             'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
-            model: model || DEFAULT_MODELS.anthropic,
+            model: usedModel,
             max_tokens: 60,
             system: SYSTEM_PROMPT,
             messages: [{ role: 'user', content: userMessage }],
@@ -64,12 +68,13 @@ async function callAnthropic({ apiKey, model, userMessage }) {
         throw new Error(`Anthropic API error ${res.status}: ${await safeText(res)}`);
     }
     const data = await res.json();
-    const text = (data.content || []).map((block) => block.text || '').join('');
-    return cleanCommand(text);
+    const raw = (data.content || []).map((block) => block.text || '').join('');
+    return { raw, model: usedModel };
 }
 
 async function callGemini({ apiKey, model, userMessage }) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model || DEFAULT_MODELS.gemini)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const usedModel = model || DEFAULT_MODELS.gemini;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(usedModel)}:generateContent?key=${encodeURIComponent(apiKey)}`;
     const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -85,11 +90,12 @@ async function callGemini({ apiKey, model, userMessage }) {
         throw new Error(`Gemini API error ${res.status}: ${await safeText(res)}`);
     }
     const data = await res.json();
-    const text = (data.candidates?.[0]?.content?.parts || []).map((part) => part.text || '').join('');
-    return cleanCommand(text);
+    const raw = (data.candidates?.[0]?.content?.parts || []).map((part) => part.text || '').join('');
+    return { raw, model: usedModel };
 }
 
 async function callOpenAI({ apiKey, model, userMessage }) {
+    const usedModel = model || DEFAULT_MODELS.openai;
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -97,7 +103,7 @@ async function callOpenAI({ apiKey, model, userMessage }) {
             authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-            model: model || DEFAULT_MODELS.openai,
+            model: usedModel,
             max_tokens: 60,
             messages: [
                 { role: 'system', content: SYSTEM_PROMPT },
@@ -109,20 +115,22 @@ async function callOpenAI({ apiKey, model, userMessage }) {
         throw new Error(`OpenAI API error ${res.status}: ${await safeText(res)}`);
     }
     const data = await res.json();
-    const text = data.choices?.[0]?.message?.content || '';
-    return cleanCommand(text);
+    const raw = data.choices?.[0]?.message?.content || '';
+    return { raw, model: usedModel };
 }
 
+// Returns { provider, model, raw, command, elapsedMs }: `raw` is exactly what
+// the model said, `command` is that text cleaned up into something the
+// parser can take. Both are handed back (not just `command`) so the caller
+// can optionally show the player what the model actually produced.
 export async function interpretCommand({ provider, apiKey, model, transcriptTail, input }) {
     if (!apiKey) {
         throw new Error('No API key configured');
     }
     const userMessage = buildUserMessage(transcriptTail, input);
-    if (provider === 'openai') {
-        return callOpenAI({ apiKey, model, userMessage });
-    }
-    if (provider === 'gemini') {
-        return callGemini({ apiKey, model, userMessage });
-    }
-    return callAnthropic({ apiKey, model, userMessage });
+    const caller = provider === 'openai' ? callOpenAI : provider === 'gemini' ? callGemini : callAnthropic;
+    const startedAt = Date.now();
+    const { raw, model: usedModel } = await caller({ apiKey, model, userMessage });
+    const elapsedMs = Date.now() - startedAt;
+    return { provider, model: usedModel, raw, command: cleanCommand(raw), elapsedMs };
 }

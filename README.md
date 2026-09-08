@@ -31,7 +31,8 @@ One manual step is required once per repo: in **Settings → Pages**, set **Sour
 2. Click **Interpreter settings…**, pick a provider (Anthropic, OpenAI, or Gemini), and paste in your own API key. It's stored only in your browser's `localStorage` and is only ever sent to the provider you chose. (Anthropic and OpenAI reliably support calling their API directly from a browser; Gemini's CORS support is less consistently documented, so if it errors out, fall back to raw mode.)
 3. Type naturally — "grab the lamp and head north", "what am I carrying?", "hang the cloak up before we go to the bar" — and the interpreter figures out the parser command.
 4. Toggle **raw mode** at any time to bypass the LLM and type exact commands straight to the game (also the automatic fallback when no key is configured).
-5. Use **Story…** to switch to your own `.z3`/`.z5`/`.z8`/`.zblorb` file.
+5. Toggle **show LLM details** to see, for every command, exactly what the model returned before cleanup, the final command sent to the game, which model answered, and how long it took — useful for judging how well the interpretation is working.
+6. Use **Story…** to switch to your own `.z3`/`.z5`/`.z8`/`.zblorb` file.
 
 ### Getting a real Zork file
 

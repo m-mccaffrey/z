@@ -40,10 +40,16 @@
 
     <footer class="statusbar">
       <span id="status-text">Loading interpreter…</span>
-      <label class="raw-toggle" title="Send your typed text straight to the game, no LLM in between">
-        <input type="checkbox" id="raw-toggle" />
-        raw mode
-      </label>
+      <div class="toggles">
+        <label class="raw-toggle" title="Send your typed text straight to the game, no LLM in between">
+          <input type="checkbox" id="raw-toggle" />
+          raw mode
+        </label>
+        <label class="raw-toggle" title="Show exactly what the model returned, alongside the cleaned-up command sent to the game">
+          <input type="checkbox" id="debug-toggle" />
+          show LLM details
+        </label>
+      </div>
     </footer>
   </div>
 

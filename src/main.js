@@ -11,6 +11,7 @@ const els = {
     sendBtn: document.getElementById('send-btn'),
     statusText: document.getElementById('status-text'),
     rawToggle: document.getElementById('raw-toggle'),
+    debugToggle: document.getElementById('debug-toggle'),
 
     storyBtn: document.getElementById('story-btn'),
     storyDialog: document.getElementById('story-dialog'),
@@ -59,6 +60,15 @@ function appendLine(text, className) {
     const div = document.createElement('div');
     div.className = className;
     div.textContent = text;
+    els.output.appendChild(div);
+    scrollToBottom();
+}
+
+function appendDebugBlock({ provider, model, raw, command, elapsedMs }) {
+    const div = document.createElement('div');
+    div.className = 'meta-line debug-block';
+    const shown = (raw || '').trim() || '(empty response)';
+    div.textContent = `» ${provider}/${model} — ${elapsedMs}ms\n  model said: ${JSON.stringify(shown)}\n  sent to game: ${command || '(nothing usable — falling back to what you typed)'}`;
     els.output.appendChild(div);
     scrollToBottom();
 }
@@ -212,18 +222,19 @@ els.inputForm.addEventListener('submit', async (event) => {
         if (useLlm) {
             setStatus('Interpreting…');
             try {
-                const translated = await interpretCommand({
+                const result = await interpretCommand({
                     provider: settings.provider,
                     apiKey: settings.apiKey,
                     model: settings.model,
                     transcriptTail,
                     input: raw,
                 });
-                if (translated) {
-                    toSend = translated;
-                    if (translated.toLowerCase() !== raw.trim().toLowerCase()) {
-                        appendLine(`» interpreted as: ${translated}`, 'meta-line interpreted-line');
-                    }
+                if (result.command) toSend = result.command;
+
+                if (els.debugToggle.checked) {
+                    appendDebugBlock(result);
+                } else if (result.command && result.command.toLowerCase() !== raw.trim().toLowerCase()) {
+                    appendLine(`» interpreted as: ${result.command}`, 'meta-line interpreted-line');
                 }
             } catch (err) {
                 appendLine(`» interpretation failed (${err.message || err}) — sending exactly what you typed`, 'meta-line error-line');

@@ -136,6 +136,13 @@ body {
     font-style: normal;
 }
 
+.debug-block {
+    font-style: normal;
+    border-left: 2px solid var(--border);
+    padding: 0.3rem 0 0.3rem 0.6rem;
+    margin: 0.3rem 0;
+}
+
 .input-row {
     display: flex;
     gap: 0.5rem;
@@ -176,6 +183,13 @@ body {
     padding: 0.5rem 0 0.9rem;
     color: var(--fg-dim);
     font-size: 0.78rem;
+}
+
+.toggles {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .raw-toggle {
